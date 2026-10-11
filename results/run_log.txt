@@ -1,0 +1,109 @@
+k    a_fft    a_direct   b_fft    b_direct
+ 0    0.0000    0.0000    0.0000    0.0000
+ 1   -0.0000    0.0000    1.0000    1.0000
+ 2    0.0000    0.0000   -0.0000   -0.0000
+ 3    0.3000    0.3000    0.0000    0.0000
+ 4   -0.0000    0.0000    0.0000    0.0000
+ 5   -0.0000    0.0000    0.5000    0.5000
+ 6   -0.0000    0.0000   -0.0000    0.0000
+ 7   -0.2000   -0.2000   -0.0000   -0.0000
+ 8    0.0000    0.0000   -0.0000   -0.0000
+ 9   -0.0000   -0.0000    0.0000    0.0000
+10    0.0000   -0.0000   -0.0000    0.0000
+
+max |a_fft - a_direct| = 2.60e-16
+max |b_fft - b_direct| = 1.84e-16
+PASS: FFT-based and direct-integral coefficients agree to floating-point precision.
+[numerics] sampling resolution: |a_1| by N = [1. 1. 1. 1. 1. 1.]
+[numerics] sampling resolution: |a_10| by N = [0.5 0.5 0.5 0.5 0.5 0.5]
+[numerics] Nyquist frequency for N=32: 16.0
+[numerics] spectrum of sin(30x) sampled at N=32: [0. 0. 1. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
+[numerics] -> all the energy shows up at k=2, not k=30! That's aliasing.
+[numerics] frequency resolution demo saved (compares record length, N=256 both cases)
+[exp1] final MSE = 0.000053
+[exp1] final |a_hat_1| = 0.9995 (target = 1.0)
+[exp1] pipeline check complete. Figures saved to figures/exp1_*.png
+[exp2] amplitude of k=1 over training: [0.151 1.045 0.826 0.912 0.94  1.003 1.007 1.016]
+[exp2] amplitude of k=5 over training: [0.027 0.142 0.105 0.106 0.083 0.062 0.068 0.199]
+[exp2] k=1 reaches 90% of target well before k=5 -> see figures/exp2_*.png
+[exp3] k=2: T1=[10, 100, 100, 10, 10]  Tk=[250, 100, 100, 250, 250]
+[exp3] k=5: T1=[10, 10, 10, 10, 10]  Tk=[None, 2000, 1500, 1500, None]
+[exp3] k=10: T1=[10, 250, 10, 10, 10]  Tk=[None, None, None, None, None]
+[exp3] k=20: T1=[10, 100, 10, 10, 10]  Tk=[None, None, None, None, None]
+[exp3] k=30: T1=[10, 10, 10, 10, 10]  Tk=[None, None, None, None, None]
+[exp3] never-learned-within-budget counts (out of 5 seeds): {2: 0, 5: 2, 10: 5, 20: 5, 30: 5}
+[exp4] low: mean final MSE = 0.00006 +/- 0.00004
+        k= 1: mean relative error = 0.000 +/- 0.000
+        k= 2: mean relative error = 0.003 +/- 0.001
+[exp4] mixed: mean final MSE = 0.06530 +/- 0.01369
+        k= 1: mean relative error = 0.021 +/- 0.020
+        k=10: mean relative error = 0.638 +/- 0.075
+[exp4] high: mean final MSE = 0.42579 +/- 0.06261
+        k=20: mean relative error = 0.798 +/- 0.058
+        k=30: mean relative error = 0.866 +/- 0.062
+[exp4] many: mean final MSE = 0.00223 +/- 0.00025
+        k= 1: mean relative error = 0.006 +/- 0.004
+        k= 2: mean relative error = 0.010 +/- 0.007
+        k= 3: mean relative error = 0.035 +/- 0.019
+        k= 4: mean relative error = 0.015 +/- 0.007
+        k= 5: mean relative error = 0.052 +/- 0.012
+        k= 6: mean relative error = 0.065 +/- 0.006
+        k= 7: mean relative error = 0.028 +/- 0.010
+        k= 8: mean relative error = 0.070 +/- 0.011
+        k= 9: mean relative error = 0.212 +/- 0.010
+        k=10: mean relative error = 0.391 +/- 0.012
+[exp5] tanh: T1=[10, 250, 10, 10, 10]  T10=[None, None, None, None, None]  final MSE mean=0.0653
+[exp5] relu: T1=[100, 100, 100, 50, 100]  T10=[None, None, None, None, None]  final MSE mean=0.0502
+[exp5] sine: T1=[10, 10, 10, 10, 10]  T10=[None, None, None, 2000, None]  final MSE mean=0.0390
+[exp6] width=16: T1=[500, 500, 500, 250, 500]  T10=[None, None, None, None, None]  final MSE mean=0.1183
+[exp6] width=32: T1=[250, 250, 250, 250, 250]  T10=[None, None, None, None, None]  final MSE mean=0.1104
+[exp6] width=64: T1=[10, 250, 10, 10, 10]  T10=[None, None, None, None, None]  final MSE mean=0.0653
+[exp6] width=128: T1=[50, 100, 100, 25, 100]  T10=[None, None, None, None, None]  final MSE mean=0.0359
+[exp7] plain: mean final MSE = 0.42579 +/- 0.06261
+        T20=[None, None, None, None, None]  T30=[None, None, None, None, None]
+[exp7] fourier: mean final MSE = 0.00000 +/- 0.00000
+        T20=[50, 50, 50, 100, 50]  T30=[50, 50, 50, 50, 50]
+[heatmap] low: saved. true frequencies = [1, 2]
+[heatmap] mixed: saved. true frequencies = [1, 10]
+[heatmap] high: saved. true frequencies = [20, 30]
+[heatmap] many: saved. true frequencies = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+============================================================
+Running verify_fft.py
+============================================================
+
+============================================================
+Running numerical_considerations.py
+============================================================
+
+============================================================
+Running exp1_baseline.py
+============================================================
+
+============================================================
+Running exp2_two_frequencies.py
+============================================================
+
+============================================================
+Running exp3_vary_frequency.py
+============================================================
+
+============================================================
+Running exp4_frequency_distributions.py
+============================================================
+
+============================================================
+Running exp5_activations.py
+============================================================
+
+============================================================
+Running exp6_width.py
+============================================================
+
+============================================================
+Running exp7_fourier_features.py
+============================================================
+
+============================================================
+Running spectral_heatmaps.py
+============================================================
