@@ -8,9 +8,7 @@ Investigated how 24+ neural networks approximate 6 mathematical functions contai
 
 ## What This Project Is About
 
-When a neural network learns a wavy function, does it learn the slow waves and the fast waves at the same speed?
-
-It doesn't because a network picks up slow (low-frequency) patterns quickly and has a much harder time with fast (high-frequency) ones. Researchers call this **spectral bias**, so I reproduced that effect on simple functions and tested a few things that might help.
+I wondered whether neural networks learn smooth waves and rapidly changing waves at the same speed. Through this project, I learned that a network picks up slow (low-frequency) patterns quickly and has a much harder time with high-frequency ones. Researchers call this **spectral bias**, so I recreated that effect on functions and tested more methods to help networks learn faster-changing patterns.
 
 ## How It Works
 
@@ -44,17 +42,13 @@ For `sin(x) + 0.5·sin(kx)`, the network always learned `sin(x)` quickly. The se
 - Making the network wider (16 → 128 neurons per layer) cut the error about 3.3×.
 - Sine activations did better than tanh and ReLU on average, but results varied a lot between seeds.
 
-**One thing helps a lot.**
-Instead of giving the network plain `x`, I gave it a list of sine and cosine waves (`sin(x), cos(x), sin(2x), …`). These are called **Fourier features**. On the high-frequency target, the error dropped from **0.43 to about 0.0000005**. Since target's frequencies were already in that list this was a best-case result.
+Instead of giving the network plain `x`, I gave it a list of sine and cosine waves (`sin(x), cos(x), sin(2x), …`), which are called **Fourier features**. On the high-frequency target, the error dropped from **0.43 to about 0.0000005**. Since the target's frequencies were already in that list, this was a best-case result.
 
 ![Plain vs. Fourier features](figures/exp7_mse_comparison.png)
 
 ## The Phase Correction
-To make sure my FFT code was right, I also calculated the Fourier coefficients the slow way, by approximating the integrals directly. The two methods should give the same answers.
-
-**What went wrong:** they didn't match. For odd frequencies (k = 1, 3, 5, …) the FFT gave the right size but the **wrong sign**. For example, it said `sin(x)` was `−sin(x)`.
-
-**Why it happened:** the FFT assumes your data starts at **x = 0**. My data started at **x = −π**. So the FFT was effectively looking at my function shifted over by π.
+To make sure my FFT code was right, I also calculated the Fourier coefficients the slow way, by approximating the integrals directly. The two methods should give the same answers. However, they didn't match.For odd frequencies (k = 1, 3, 5, …), the FFT gave the right size but the wrong sign. For example, it said `sin(x)` was `−sin(x)`.
+This happened because the FFT indexed my data as if it started a **x = −π**. So the FFT was effectively looking at my function shifted over by π.
 
 Shifting a sine wave by π does this:
 
@@ -65,15 +59,12 @@ sin(k(x − π)) = (−1)^k · sin(kx)
 - If k is **even**, (−1)^k = +1, so nothing changes.
 - If k is **odd**, (−1)^k = −1, so the sign flips.
 
-That's exactly the pattern I saw: even frequencies were fine and odd ones came out flipped.
+That's exactly the pattern I saw: even frequencies were fine and odd ones came out flipped. The even frequencies were fine, and the odd ones came out flipped. To fix this, I used a phase-correction formula from a textbook. It adjusted each FFT result for where the data actually starts. For my interval, I multiplied each coefficient by (−1)^k to undo the flip. After the correction, the FFT and the slow method agreed to within 0.0000000000000003, which is just computer rounding error.
 
-**The fix:** I used a phase-correction formula from a textbook. It adjusts each FFT result for where the data actually starts. For my interval, it comes down to multiplying each coefficient by (−1)^k to undo the flip.
-
-**Checking the fix:** after the correction, the FFT and the slow method agreed to within 0.0000000000000003, which is just computer rounding error.
 
 ## Avoiding Aliasing
 
-If you don't sample a wave often enough, a fast wave can look like a slow one. This is called **aliasing**. I tested it by sampling `sin(30x)` at only 32 points, and the FFT reported it as `sin(2x)`. To avoid this in my real experiments, I used 512 evenly spaced points, which is enough to measure frequencies up to 256. My fastest target was 30, so there was plenty of room.
+If I didn't sample a wave often enough, a fast wave could look like a slow one. This is called **aliasing**. I tested it by sampling `sin(30x)` at only 32 points, and the FFT reported it as `sin(2x)` (with a sign difference). To avoid this in my real experiments, I used 512 evenly spaced points, which is enough to measure frequencies up to 256. My fastest target was 30, so there was plenty of room.
 
 ## Limitations
 
