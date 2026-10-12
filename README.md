@@ -1,26 +1,22 @@
 Worked on this project locally over the course of a couple of months, with the final commit made to publish it on GitHub.
 
 # Investigating Spectral Bias in Neural Networks Through Fourier Analysis
-Investigated how 24+ neural networks approximate 6 mathematical functions containing controlled low- and high-frequency components by tracking 12 Fourier coefficients of model predictions across 1,500 training iterations.
 
+## What
 
-**Tools:** Python, NumPy, PyTorch, Matplotlib
-
-## What This Project Is About
-
-I wondered whether neural networks learn smooth waves and rapidly changing waves at the same speed. Through this project, I learned that a network picks up slow (low-frequency) patterns quickly and has a much harder time with high-frequency ones. Researchers call this **spectral bias**, so I recreated that effect on functions and tested more methods to help networks learn faster-changing patterns.
+I wondered whether neural networks learn smooth waves and rapidly changing waves at the same speed. Through this project, I learned that a network picks up smooth, low-frequency patterns quickly and has a much harder time with high-frequency ones. Researchers call this **spectral bias**, so I recreated that effect on functions and tested more methods to help networks learn faster-changing patterns.
 
 ## How It Works
 
 1. **Make a target function out of sine waves**, like `sin(x) + 0.5·sin(10x)`.
 2. **Train a small neural network** to copy that function.
 3. **Check in during training.** Randomly taking the network's current output and running a Fourier transform (FFT) on it to see how much of each frequency the network has learned so far.
-4. **Compare to the right answer.** I count a frequency as "learned" once the network reaches 90% of its true size and repeated this with 5 different ransom seeds.
+4. **Compare to the right answer.** I count a frequency as "learned" once the network reaches 90% of its target amplitude and repeated this with 5 different ransom seeds.
 
 ## What I Found
 
 **Low frequencies are learned first.**
-For `sin(x) + 0.5·sin(kx)`, the network always learned `sin(x)` quickly. The second wave got harder as `k` got bigger:
+For `sin(x) + 0.5·sin(kx)`, across these experiments the network always learned `sin(x)` quickly. The second wave got harder as `k` got bigger:
 
 | Second frequency (k) | Runs that learned it (out of 5) |
 |---|---|
@@ -48,7 +44,7 @@ Instead of giving the network plain `x`, I gave it a list of sine and cosine wav
 
 ## The Phase Correction
 To make sure my FFT code was right, I also calculated the Fourier coefficients the slow way, by approximating the integrals directly. The two methods should give the same answers. However, they didn't match.For odd frequencies (k = 1, 3, 5, …), the FFT gave the right size but the wrong sign. For example, it said `sin(x)` was `−sin(x)`.
-This happened because the FFT indexed my data as if it started a **x = −π**. So the FFT was effectively looking at my function shifted over by π.
+This happened because the FFT indexed my data as if it started a **x = −π**. So the FFT was effectively looking at my function shifted over by π. My samples started at  **x = −π**, but I initially interpreted the FFT coefficients without accounting for that offset.
 
 Shifting a sine wave by π does this:
 
@@ -64,7 +60,7 @@ That's exactly the pattern I saw: even frequencies were fine and odd ones came o
 
 ## Avoiding Aliasing
 
-If I didn't sample a wave often enough, a fast wave could look like a slow one. This is called **aliasing**. I tested it by sampling `sin(30x)` at only 32 points, and the FFT reported it as `sin(2x)` (with a sign difference). To avoid this in my real experiments, I used 512 evenly spaced points, which is enough to measure frequencies up to 256. My fastest target was 30, so there was plenty of room.
+If I didn't sample a wave often enough, a high-frequency wave could look like a low-frequency one. This is called **aliasing**. I tested it by sampling `sin(30x)` at only 32 points, and the FFT reported it as `sin(2x)` (with a sign difference). To avoid this in my real experiments, I used 512 evenly spaced points, which is enough to measure frequencies up to 256. My fastest target was 30, so there was plenty of room.
 
 ## Limitations
 
